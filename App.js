@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator, createAppContainer} from 'react-navigation'
-import KittenList from './kittenList'
-import {KittenView} from './kittenview'
+import KittenList from './Views/kittenList'
+import {KittenView} from './Views/kittenview'
 
 
 const RootStack = createStackNavigator({
@@ -20,7 +20,7 @@ const RootStack = createStackNavigator({
   },
 });
 
-const App = createAppContainer(RootStack)
+const App = createAppContainer(RootStack);
 
 
 

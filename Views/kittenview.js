@@ -1,14 +1,14 @@
-import React, {Component } from 'react';
+import React from 'react';
 import {View, Text, Image, StyleSheet, ScrollView} from 'react-native';
-import Names  from './catnames'
-import Desc from './descriptions'
+import Names  from '../data/catnames'
+import Desc from '../data/descriptions'
 
 export class KittenView extends React.Component {
     constructor(props){
         super(props);
         this.state = {
             viewNumber: 0
-        }
+        };
         this.number= 0;
     }
 

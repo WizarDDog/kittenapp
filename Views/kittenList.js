@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { FlatList , Text, Image, View, StatusBar, TouchableHighlight, Button, NetInfo, StyleSheet} from 'react-native';
-import Names  from './catnames'
+import Names  from '../data/catnames'
 
 
 export class KittenList extends Component {
