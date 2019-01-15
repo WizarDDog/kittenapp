@@ -6,9 +6,6 @@ import Desc from '../data/descriptions'
 export class KittenView extends React.Component {
     constructor(props){
         super(props);
-        this.state = {
-            viewNumber: 0
-        };
         this.number= 0;
     }
 

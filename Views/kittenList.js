@@ -1,22 +1,34 @@
 import React, {Component} from 'react';
-import { FlatList , Text, Image, View, StatusBar, TouchableHighlight, Button, NetInfo, StyleSheet} from 'react-native';
-import Names  from '../data/catnames'
-
+import { FlatList , Text, Image, View, StatusBar, TouchableHighlight, Button, NetInfo, StyleSheet, AsyncStorage} from 'react-native';
+import Names  from '../data/catnames';
+import store from '../store/';
 
 export class KittenList extends Component {
     constructor(props) {
         super(props);
         this.state = {
                 cat: [],
-            newCat: [],
+            newList: [],
             loading: true,
             number: 0,
-            button: false
+            button: false,
+            first: true,
         };
     }
 
 
-        makeSome() {
+        componentDidMount() {
+            setTimeout(() => this.setState({ loading: false }), 1000);
+            NetInfo.getConnectionInfo((res)=> res.json).then((some)=> {
+                if(some.type === "none"){
+                    alert('No internet')
+                }});
+            let number = 10;
+            this.list(number).catch(err=>console.log(err))
+    }
+
+
+        makeNewKittenList() {
             const maxNumber = 16;
             const maxNameNumber = 95;
             let picture = [];
@@ -24,41 +36,42 @@ export class KittenList extends Component {
                     const randomNumber = Math.floor(Math.random() * maxNumber + 1);
                     const randomNameNumber = Math.floor(Math.random() * maxNameNumber + 1);
                     picture.push(`http://placekitten.com/300/300?image=${randomNumber}` );
-                    this.state.newCat.push({
+                    this.state.newList.push({
                         picture: picture[i],
                         name: Names[randomNameNumber],
                         keyPic: randomNumber,
                         keyName: randomNameNumber
                     })
                 }
-        }
-        async list30(){
-            await this.setState({number: 30, cat: [],newCat: [], button: false});
-            await this.makeSome();
-            await this.setState({cat: this.state.newCat});
-        }
-        async list50(){
-            await this.setState({number: 50, cat: [], newCat: [],button: false});
-            await this.makeSome();
-            await this.setState({cat: this.state.newCat});
-        }
-        async list100(){
-            await this.setState({number: 100, cat: [], newCat: [],button: false});
-            await this.makeSome();
-            await this.setState({cat: this.state.newCat});
+                if(this.state.first){
+                    this.setState({first: false});
+                    AsyncStorage.setItem('catStorage', JSON.stringify(this.state.newList))
+                }
         }
 
-    componentDidMount() {
-        setTimeout(() => this.setState({ loading: false }), 1000);
-        NetInfo.getConnectionInfo((res)=> res.json).then((some)=> this.handleNoInternet(some.type));
-    }
-
-    handleNoInternet(check){
-        if(check === "none") {
-            alert('No internet')
+        checkNoInternet(){
+            NetInfo.getConnectionInfo((res)=> res.json).then((some)=> {
+                if(some.type === "none"){
+                    AsyncStorage.getItem('catStorage').then((value) =>
+                    this.setState({cat: value}))
+                } else {
+                    this.finishList().catch()
+                }
+            })
         }
-        this.list30().catch()
-    }
+
+        async finishList(){
+            await store.dispatch({type: 'NEW_CAT_LIST' , data: this.state.newList});
+            await this.makeNewKittenList();
+            await this.setState({cat: this.state.newList})
+        }
+
+        async list(number){
+            await store.dispatch({type: 'DELETE_LIST'});
+            await this.setState({number: number, cat: [], newList: [], button: false});
+            await this.checkNoInternet();
+        }
+
     cancel(){
         this.setState({button: false})
     }
@@ -71,15 +84,24 @@ export class KittenList extends Component {
                             title="Cancel"
                         />
                         <Button
-                            onPress={() => this.list30()}
+                            onPress={() => {
+                                let number = 30;
+                                this.list(number).catch()
+                            }}
                             title="30"
                         />
                         <Button
-                            onPress={()=> this.list50()}
+                            onPress={() => {
+                                let number = 50;
+                                this.list(number).catch()
+                            }}
                             title="50"
                         />
                         <Button
-                            onPress={()=> this.list100()}
+                            onPress={() => {
+                                let number = 100;
+                                this.list(number).catch()
+                            }}
                             title="100"
                         />
             </View>
@@ -126,6 +148,11 @@ const styles = StyleSheet.create({
     view: {borderWidth: 10,borderRadius: 15 , borderColor: "#00BFFF", margin: 10},
     image: {alignItems:'center', height: 300, width: 280},
     button: { marginRight: 250}
+});
+
+
+store.subscribe(()=> {
+   // console.log(store.getState())
 });
 
 
